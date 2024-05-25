@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:udevs_task/domain/usecases/add_event.dart';
+import 'package:udevs_task/presentation/bloc/add_event/add_event_bloc.dart';
 
 class AddEventScreen extends StatefulWidget {
   const AddEventScreen({super.key});
@@ -60,116 +63,172 @@ class _AddEventScreenState extends State<AddEventScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
+    return BlocProvider<AddEventBloc>(
+      create: (context) =>
+          AddEventBloc(addEvent: AddEvent(repository: getIt())),
+      child: Scaffold(
         backgroundColor: Colors.white,
-        elevation: 0,
-        title: const Text('Add Event',
-            style: TextStyle(color: Colors.black, fontSize: 20)),
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          title: const Text('Add Event',
+              style: TextStyle(color: Colors.black, fontSize: 20)),
+          centerTitle: true,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+            onPressed: () => Navigator.pop(context),
+          ),
         ),
-      ),
-      // ... your app bar code
-      body: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+        // ... your app bar code
+        body: Form(
+          key: _formKey,
+          child: Stack(
             children: [
-              // Event Name
-              Text('Event Name', style: Theme.of(context).textTheme.bodyLarge),
-              const SizedBox(height: 4),
-              _buildTextFormField(
-                  controller: _eventNameController,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter an event name';
-                    }
-                    return null;
-                  }),
-              //Event Description
-              const SizedBox(height: 16),
-              Text('Event Description',
-                  style: Theme.of(context).textTheme.bodyLarge),
-              const SizedBox(height: 4),
-              _buildTextFormField(
-                maxLines: 4,
-                controller: _eventDescController,
-              ),
-              //Event Location
-              const SizedBox(height: 16),
-              Text('Event Location',
-                  style: Theme.of(context).textTheme.bodyLarge),
-              const SizedBox(height: 4),
-              _buildTextFormField(
-                controller: _eventLocationController,
-                suffixIcon: const Icon(
-                  Icons.location_on_rounded,
-                  color: Colors.blue,
-                ),
-              ),
-
-              // Priority Colors
-              const SizedBox(height: 16),
-              Text('Priority Color',
-                  style: Theme.of(context).textTheme.bodyLarge),
-              const SizedBox(height: 4),
-              Wrap(
-                spacing: 8.0,
-                children: Colors.primaries.map((color) {
-                  return GestureDetector(
-                    onTap: () => setState(() => _selectedColor = color),
-                    child: CircleAvatar(
-                      backgroundColor: color,
-                      child: _selectedColor == color
-                          ? const Icon(Icons.check, color: Colors.white)
-                          : null,
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Event Name
+                    Text('Event Name',
+                        style: Theme.of(context).textTheme.bodyLarge),
+                    const SizedBox(height: 4),
+                    _buildTextFormField(
+                        controller: _eventNameController,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter an event name';
+                          }
+                          return null;
+                        }),
+                    //Event Description
+                    const SizedBox(height: 16),
+                    Text('Event Description',
+                        style: Theme.of(context).textTheme.bodyLarge),
+                    const SizedBox(height: 4),
+                    _buildTextFormField(
+                      maxLines: 4,
+                      controller: _eventDescController,
                     ),
-                  );
-                }).toList(),
-              ),
-              // Event Time
-              const SizedBox(height: 16),
-              Text('Event time', style: Theme.of(context).textTheme.bodyLarge),
-              const SizedBox(height: 4),
-              TextFormField(
-                readOnly: true,
-                controller: _eventTimeController, // Use the time controller
-                decoration: _inputDecoration().copyWith(
-                  suffixIcon:
-                      const Icon(Icons.calendar_today, color: Colors.blue),
+                    //Event Location
+                    const SizedBox(height: 16),
+                    Text('Event Location',
+                        style: Theme.of(context).textTheme.bodyLarge),
+                    const SizedBox(height: 4),
+                    _buildTextFormField(
+                      controller: _eventLocationController,
+                      suffixIcon: const Icon(
+                        Icons.location_on_rounded,
+                        color: Colors.blue,
+                      ),
+                    ),
+
+                    // Priority Colors
+                    const SizedBox(height: 16),
+                    Text('Priority Color',
+                        style: Theme.of(context).textTheme.bodyLarge),
+                    const SizedBox(height: 4),
+                    SizedBox(
+                      width: 70,
+                      child: DropdownButtonFormField<Color>(
+                        value: _selectedColor,
+                        onChanged: (color) =>
+                            setState(() => _selectedColor = color!),
+                        items: [
+                          Colors.blue,
+                          Colors.red,
+                          Colors.yellow,
+                        ].map((Color color) {
+                          // Map the colors directly
+                          return DropdownMenuItem<Color>(
+                            value: color,
+                            child: SizedBox(
+                              height: 30,
+                              width: 30,
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(color: color),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                        decoration:
+                            _inputDecoration(), // Use the decoration here
+                        icon: const Icon(
+                          Icons.arrow_drop_down,
+                          color: Colors.blue,
+                        ),
+                      ),
+                    ),
+                    // Event Time
+                    const SizedBox(height: 16),
+                    Text('Event time',
+                        style: Theme.of(context).textTheme.bodyLarge),
+                    const SizedBox(height: 4),
+                    TextFormField(
+                      readOnly: true,
+                      controller:
+                          _eventTimeController, // Use the time controller
+                      decoration: _inputDecoration().copyWith(
+                        suffixIcon: const Icon(Icons.calendar_today,
+                            color: Colors.blue),
+                      ),
+                      onTap: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: _selectedDateTime,
+                          firstDate: DateTime(2023),
+                          lastDate: DateTime(2025),
+                        );
+                        final time = await showTimePicker(
+                          context: context,
+                          initialTime:
+                              TimeOfDay.fromDateTime(_selectedDateTime),
+                        );
+                        if (picked != null && time != null) {
+                          setState(() {
+                            _selectedDateTime = DateTime(
+                              picked.year,
+                              picked.month,
+                              picked.day,
+                              time.hour,
+                              time.minute,
+                            );
+                            // Update the text field
+                            _eventTimeController.text =
+                                _selectedDateTime.toString();
+                          });
+                        }
+                      },
+                    ),
+                  ],
                 ),
-                onTap: () async {
-                  final picked = await showDatePicker(
-                    context: context,
-                    initialDate: _selectedDateTime,
-                    firstDate: DateTime(2023),
-                    lastDate: DateTime(2025),
-                  );
-                  final time = await showTimePicker(
-                    context: context,
-                    initialTime: TimeOfDay.fromDateTime(_selectedDateTime),
-                  );
-                  if (picked != null && time != null) {
-                    setState(() {
-                      _selectedDateTime = DateTime(
-                        picked.year,
-                        picked.month,
-                        picked.day,
-                        time.hour,
-                        time.minute,
-                      );
-                      // Update the text field
-                      _eventTimeController.text = _selectedDateTime.toString();
-                    });
-                  }
-                },
               ),
+              Positioned(
+                bottom: 16, // Adjust the bottom margin as needed
+                left: 16,
+                right: 16,
+                child: Container(
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: Colors.blue,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Add',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.normal,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
             ],
           ),
         ),
