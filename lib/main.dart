@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
+import 'package:udevs_task/add_event_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -230,6 +231,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 GestureDetector(
                   onTap: () {
                     // TODO: Yangi tadbir yaratish ekraniga o'tish
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const AddEventScreen(),
+                        ));
                   },
                   child: Container(
                     padding:
