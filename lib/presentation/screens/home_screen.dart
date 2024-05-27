@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:udevs_task/presentation/bloc/add_event/add_event_bloc.dart';
 import 'package:udevs_task/presentation/screens/add_event_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -210,10 +212,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   onTap: () {
                     // TODO: Yangi tadbir yaratish ekraniga o'tish
                     Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const AddEventScreen(),
-                        ));
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => BlocProvider.value(
+                          value: BlocProvider.of<AddEventBloc>(context),
+                          child: const AddEventScreen(),
+                        ),
+                      ),
+                    );
                   },
                   child: Container(
                     padding:
