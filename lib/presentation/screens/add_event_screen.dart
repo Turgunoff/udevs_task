@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:udevs_task/domain/entities/event.dart';
 import 'package:udevs_task/domain/usecases/add_event.dart';
 import 'package:udevs_task/presentation/bloc/add_event/add_event_bloc.dart';
 
@@ -63,9 +64,22 @@ class _AddEventScreenState extends State<AddEventScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<AddEventBloc>(
-      create: (context) =>
-          AddEventBloc(addEvent: AddEvent(repository: getIt())),
+    return BlocListener<AddEventBloc, AddEventState>(
+      // BLoC Listener qo'shildi
+      listener: (context, state) {
+        if (state is AddEventSuccess) {
+          // Tadbir muvaffaqiyatli qo'shilganda
+          Navigator.of(context).pop(); // Ekrandan chiqish (ixtiyoriy)
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Tadbir muvaffaqiyatli qo\'shildi')),
+          );
+        } else if (state is AddEventError) {
+          // Xatolik yuz berganda
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.error)),
+          );
+        }
+      },
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
@@ -79,7 +93,6 @@ class _AddEventScreenState extends State<AddEventScreen> {
             onPressed: () => Navigator.pop(context),
           ),
         ),
-        // ... your app bar code
         body: Form(
           key: _formKey,
           child: Stack(
@@ -207,25 +220,40 @@ class _AddEventScreenState extends State<AddEventScreen> {
                 bottom: 16, // Adjust the bottom margin as needed
                 left: 16,
                 right: 16,
-                child: Container(
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: Colors.blue,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Add',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.normal,
+                child: GestureDetector(
+                  onTap: () {
+                    if (_formKey.currentState!.validate()) {
+                      context.read<AddEventBloc>().add(
+                            Event(
+                              name: _eventNameController.text,
+                              description: _eventDescController.text,
+                              location: _eventLocationController.text,
+                              color: _selectedColor,
+                              dateTime: _selectedDateTime,
+                            ),
+                          );
+                    }
+                  },
+                  child: Container(
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: Colors.blue,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Add',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.normal,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               )

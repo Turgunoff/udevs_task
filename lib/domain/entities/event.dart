@@ -18,5 +18,15 @@ class Event {
     required this.dateTime,
   });
 
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'description': description,
+        'location': location,
+        'color': color.value
+            .toString(), // Convert Color to string representation (e.g., hex code)
+        'dateTime': dateTime.toIso8601String(),
+      };
+
   // Bu yerda kerak bo'lsa, qo'shimcha metodlar yoki konstruktorlar qo'shishingiz mumkin
 }
