@@ -1,17 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:udevs_task/domain/entities/event.dart';
 import 'package:udevs_task/domain/usecases/delete_event.dart';
 import 'package:udevs_task/presentation/screens/update_event_screen.dart';
 
 class DetailScreen extends StatelessWidget {
-  Event event;
+  final Event event;
 
-  DetailScreen({super.key, required this.event});
+  const DetailScreen({super.key, required this.event});
+  Color _getColorFromCode(String colorCode) {
+    switch (colorCode) {
+      case 'B':
+        return Colors.blue;
+      case 'R':
+        return Colors.red;
+      case 'Y':
+        return Colors.purple;
+      default:
+        return Colors.blue; // Standart rang (ko'k)
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final eventColor = _getColorFromCode(event.type);
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -19,8 +32,8 @@ class DetailScreen extends StatelessWidget {
           children: [
             Container(
               padding: const EdgeInsets.all(26),
-              decoration: const BoxDecoration(
-                color: Colors.blue,
+              decoration: BoxDecoration(
+                color: eventColor,
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(30),
                   bottomRight: Radius.circular(30),
@@ -56,24 +69,27 @@ class DetailScreen extends StatelessWidget {
                             ),
                           );
                         },
-                        child: const Row(
-                          children: [
-                            Icon(
-                              Icons.edit,
-                              color: Colors.white,
-                              size: 16,
-                            ),
-                            SizedBox(
-                              width: 4,
-                            ),
-                            Text(
-                              'Edit',
-                              style: TextStyle(
+                        child: Container(
+                          padding: const EdgeInsets.all(10),
+                          child: const Row(
+                            children: [
+                              Icon(
+                                Icons.edit,
                                 color: Colors.white,
-                                fontSize: 16,
+                                size: 16,
                               ),
-                            )
-                          ],
+                              SizedBox(
+                                width: 4,
+                              ),
+                              Text(
+                                'Edit',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                ),
+                              )
+                            ],
+                          ),
                         ),
                       )
                     ],

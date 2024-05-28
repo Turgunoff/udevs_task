@@ -8,3 +8,9 @@ class AddEventSubmitted extends AddEventEvent {
 
   AddEventSubmitted(this.event);
 }
+
+class UpdateEventSubmitted extends AddEventEvent {
+  final Event event;
+
+  UpdateEventSubmitted(this.event);
+}

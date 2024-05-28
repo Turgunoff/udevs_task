@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:udevs_task/domain/entities/event.dart';
 import 'package:udevs_task/presentation/bloc/add_event/add_event_bloc.dart';
+import 'package:udevs_task/presentation/screens/home_screen.dart';
 
 class AddEventScreen extends StatefulWidget {
-  const AddEventScreen({super.key});
+  final Event? event;
+  const AddEventScreen({super.key, this.event});
 
   @override
   State<AddEventScreen> createState() => _AddEventScreenState();
@@ -13,13 +15,42 @@ class AddEventScreen extends StatefulWidget {
 class _AddEventScreenState extends State<AddEventScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  final TextEditingController _eventNameController = TextEditingController();
-  final TextEditingController _eventDescController = TextEditingController();
-  final TextEditingController _eventLocationController =
-      TextEditingController();
-  final TextEditingController _eventTimeController = TextEditingController();
+  late TextEditingController _eventNameController;
+  late TextEditingController _eventDescController;
+  late TextEditingController _eventLocationController;
+  TextEditingController _eventTimeController = TextEditingController();
   Color _selectedColor = Colors.blue;
   DateTime _selectedDateTime = DateTime.now();
+  DateTime? _selectedStartTime; // Boshlanish vaqti uchun
+  DateTime? _selectedEndTime; // Tugash vaqti uchun
+  String type = 'B';
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.event != null) {
+      // Tahrirlash rejimida
+      _eventNameController = TextEditingController(text: widget.event!.name);
+      _eventDescController =
+          TextEditingController(text: widget.event!.description);
+      _eventLocationController =
+          TextEditingController(text: widget.event!.location);
+      type = widget.event!.type;
+
+      // _eventTimeController = TextEditingController(text: widget.event!.dateTime.toString());
+      // _selectedColor = widget.event!.color;
+      // _selectedDateTime = widget.event!.dateTime;
+    } else {
+      // Yangi tadbir qo'shish rejimida
+      _eventNameController = TextEditingController();
+      _eventDescController = TextEditingController();
+      _eventLocationController = TextEditingController();
+      type = 'B';
+      // _eventTimeController = TextEditingController();
+      // _selectedColor = Colors.blue; // Default
+      // _selectedDateTime = DateTime.now(); // Default
+    }
+  }
 
   // Reusable input decoration style
   InputDecoration _inputDecoration() => InputDecoration(
@@ -71,8 +102,8 @@ class _AddEventScreenState extends State<AddEventScreen> {
           appBar: AppBar(
             backgroundColor: Colors.white,
             elevation: 0,
-            title: const Text('Add Event',
-                style: TextStyle(color: Colors.black, fontSize: 20)),
+            title: Text(widget.event == null ? 'Add Event' : 'Update Event',
+                style: const TextStyle(color: Colors.black, fontSize: 20)),
             centerTitle: true,
             leading: IconButton(
               icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
@@ -83,18 +114,30 @@ class _AddEventScreenState extends State<AddEventScreen> {
           bottomNavigationBar: GestureDetector(
             onTap: () {
               if (_formKey.currentState!.validate()) {
-                // Formani validatsiya qilish
+                String type = ''; // blueColor o'zgaruvchisini e'lon qilish
+
+                if (_selectedColor == Colors.blue) {
+                  type = 'B';
+                } else if (_selectedColor == Colors.red) {
+                  type = 'R';
+                } else if (_selectedColor == Colors.purple) {
+                  type = 'Y';
+                }
+                final event = Event(
+                  id: widget.event?.id,
+                  name: _eventNameController.text,
+                  description: _eventDescController.text,
+                  location: _eventLocationController.text,
+                  type: type,
+                  // color: _selectedColor,
+                  // startTime: _selectedDateTime,
+                  // endTime: _selectedDateTime.add(const Duration(hours: 1)),
+                );
+
                 context.read<AddEventBloc>().add(
-                      AddEventSubmitted(Event(
-                        name: _eventNameController.text,
-                        description: _eventDescController.text,
-                        location: _eventLocationController.text,
-                        // color: _selectedColor,
-                        // Vaqtni to'g'ri formatda olish
-                        // startTime: _selectedDateTime,
-                        // endTime: _selectedDateTime.add(const Duration(
-                        //     hours: 1)), // Misol tariqasida 1 soat qo'shildi
-                      )),
+                      widget.event == null // Shartga qarab mos eventni yuborish
+                          ? AddEventSubmitted(event)
+                          : UpdateEventSubmitted(event),
                     );
               }
             },
@@ -105,13 +148,13 @@ class _AddEventScreenState extends State<AddEventScreen> {
                 color: Colors.blue,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Row(
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
-                    'Add',
-                    style: TextStyle(
+                    widget.event == null ? 'Add Event' : 'Update Event',
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,
                       fontWeight: FontWeight.normal,
@@ -123,12 +166,20 @@ class _AddEventScreenState extends State<AddEventScreen> {
           ),
         );
       },
-      listener: (context, state) {
+      listener: (context, state) async {
         if (state is AddEventSuccess) {
-          Navigator.of(context)
-              .pop(); // Muvaffaqiyatli qo'shilgandan so'ng ekranni yopamiz
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const HomeScreen(),
+            ),
+          ); // Muvaffaqiyatli qo'shilgandan so'ng ekranni yopamiz
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Tadbir muvaffaqiyatli qo\'shildi')),
+            SnackBar(
+                content: Text(
+              widget.event == null
+                  ? 'Tadbir muvaffaqiyatli qo\'shildi'
+                  : 'Tadbir muvaffaqiyatli yangilandi',
+            )),
           );
         } else if (state is AddEventError) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -204,7 +255,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
                   items: [
                     Colors.blue,
                     Colors.red,
-                    Colors.yellow,
+                    Colors.purple,
                   ].map((Color color) {
                     // Map the colors directly
                     return DropdownMenuItem<Color>(
@@ -232,10 +283,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
               TextFormField(
                 readOnly: true,
                 controller: _eventTimeController, // Use the time controller
-                decoration: _inputDecoration().copyWith(
-                  suffixIcon:
-                      const Icon(Icons.calendar_today, color: Colors.blue),
-                ),
+                decoration: _inputDecoration().copyWith(),
                 onTap: () async {
                   final picked = await showDatePicker(
                     context: context,

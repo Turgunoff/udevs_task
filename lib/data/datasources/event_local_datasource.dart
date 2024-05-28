@@ -28,8 +28,7 @@ class EventLocalDatasource {
             name TEXT,
             description TEXT,
             location TEXT,
-            color INTEGER,
-            dateTime TEXT
+            type TEXT
           )
         ''');
       },

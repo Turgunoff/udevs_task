@@ -41,7 +41,10 @@ void setup() {
   );
 
   // BLoCs
-  getIt.registerFactory<AddEventBloc>(() => AddEventBloc(addEvent: getIt()));
+  getIt.registerFactory<AddEventBloc>(() => AddEventBloc(
+        addEvent: getIt(),
+        updateEvent: getIt(),
+      ));
 }
 
 void main() async {

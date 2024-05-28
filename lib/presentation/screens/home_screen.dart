@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
 import 'package:udevs_task/presentation/screens/detail_screen.dart';
@@ -25,19 +24,27 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadEvents() async {
-    final getEvents = GetIt.I<GetEvents>(); // GetEvents use case'ini olish
+    final getEvents = GetIt.I<GetEvents>();
     try {
       final events = await getEvents();
-      print("Events: $events"); // events qiymatini konsolga chiqarish
-      print(
-          "Events: ${events.toString()}"); // events ni String qiymatga o'tkazib konsolga chiqarish
-
       setState(() {
         _events = events;
       });
     } catch (e) {
-      // Xatolikni qayta ishlash (masalan, foydalanuvchiga xabar berish)
       print('Xatolik: $e');
+    }
+  }
+
+  Color _getColorFromCode(String colorCode) {
+    switch (colorCode) {
+      case 'B':
+        return Colors.blue;
+      case 'R':
+        return Colors.red;
+      case 'Y':
+        return Colors.purple;
+      default:
+        return Colors.blue; // Standart rang (ko'k)
     }
   }
 
@@ -269,6 +276,7 @@ class _HomeScreenState extends State<HomeScreen> {
               itemBuilder: (context, index) {
                 final event =
                     _events![index]; // Endi bu yerda events ishlatiladi
+                final eventColor = _getColorFromCode(event.type);
                 return GestureDetector(
                   onTap: () {
                     Navigator.push(
@@ -285,7 +293,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Container(
                     margin: const EdgeInsets.symmetric(vertical: 8),
                     decoration: BoxDecoration(
-                      color: Colors.blue[100],
+                      color: eventColor.withAlpha(100),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Column(
@@ -293,9 +301,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         Container(
                           height: 10,
-                          decoration: const BoxDecoration(
-                            color: Colors.blue,
-                            borderRadius: BorderRadius.only(
+                          decoration: BoxDecoration(
+                            color: eventColor,
+                            borderRadius: const BorderRadius.only(
                                 topLeft: Radius.circular(8),
                                 topRight: Radius.circular(8)),
                           ),
@@ -310,15 +318,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 20,
-                                  color: Colors.blue[800],
+                                  color: eventColor.withAlpha(255),
                                 ),
                               ),
                               Text(
-                                'Manchester United vs Arsenal (Premiere League)',
+                                // 'Manchester United vs Arsenal (Premiere League)',
+                                event.type,
                                 style: TextStyle(
                                   fontWeight: FontWeight.normal,
                                   fontSize: 14,
-                                  color: Colors.blue[800],
+                                  color: eventColor.withAlpha(255),
                                 ),
                               ),
                               const SizedBox(height: 8),
@@ -327,27 +336,27 @@ class _HomeScreenState extends State<HomeScreen> {
                                   Icon(
                                     size: 20,
                                     Icons.access_time_filled_sharp,
-                                    color: Colors.blue[800],
+                                    color: eventColor.withAlpha(255),
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
                                     'data',
                                     // '${dateFormat(event.startTime.toString())} - ${dateFormat(event.endTime.toString())}', // Vaqt oralig'ini ko'rsatish,
                                     style: TextStyle(
-                                      color: Colors.blue[800],
+                                      color: eventColor.withAlpha(255),
                                     ),
                                   ),
                                   const SizedBox(width: 8),
                                   Icon(
                                     Icons.location_on,
                                     size: 20,
-                                    color: Colors.blue[800],
+                                    color: eventColor.withAlpha(255),
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
                                     event.location,
                                     style: TextStyle(
-                                      color: Colors.blue[800],
+                                      color: eventColor,
                                     ),
                                   ),
                                 ],

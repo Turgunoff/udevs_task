@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 class Event {
   final int? id;
   final String name;
@@ -5,7 +7,7 @@ class Event {
   final String location;
   // final DateTime startTime; // Tadbir boshlanish vaqti
   // final DateTime endTime; // Tadbir tugash vaqti
-  // final Color color;
+  final String type;
 
   Event({
     this.id,
@@ -14,7 +16,7 @@ class Event {
     required this.location,
     // required this.startTime,
     // required this.endTime,
-    // required this.color,
+    required this.type,
   });
 
   // JSON seriyallashtirish uchun toJson metodi
@@ -25,7 +27,7 @@ class Event {
         'location': location,
         // 'startTime': startTime.toIso8601String(),
         // 'endTime': endTime.toIso8601String(),
-        // 'color': color.value.toString(),
+        'type': type,
       };
 
   // JSON deseriyallashtirish uchun fromJson factory konstruktori
@@ -36,7 +38,7 @@ class Event {
         location: json['location'],
         // startTime: DateTime.parse(json['startTime']),
         // endTime: DateTime.parse(json['endTime']),
-        // color: Color(int.parse(json['color'])),
+        type: json['type'],
       );
 
   // Obyektni nusxalash uchun copyWith metodi
@@ -47,7 +49,7 @@ class Event {
     String? location,
     // DateTime? startTime,
     // DateTime? endTime,
-    // Color? color,
+    String? type,
   }) {
     return Event(
       id: id ?? this.id,
@@ -56,7 +58,7 @@ class Event {
       location: location ?? this.location,
       // startTime: startTime ?? this.startTime,
       // endTime: endTime ?? this.endTime,
-      // color: color ?? this.color,
+      type: type ?? this.type,
     );
   }
 }
