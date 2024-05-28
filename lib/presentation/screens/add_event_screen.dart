@@ -12,6 +12,7 @@ class AddEventScreen extends StatefulWidget {
 
 class _AddEventScreenState extends State<AddEventScreen> {
   final _formKey = GlobalKey<FormState>();
+
   final TextEditingController _eventNameController = TextEditingController();
   final TextEditingController _eventDescController = TextEditingController();
   final TextEditingController _eventLocationController =
@@ -63,77 +64,82 @@ class _AddEventScreenState extends State<AddEventScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AddEventBloc, AddEventState>(builder: (context, state) {
-      return Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
+    return BlocConsumer<AddEventBloc, AddEventState>(
+      builder: (context, state) {
+        return Scaffold(
           backgroundColor: Colors.white,
-          elevation: 0,
-          title: const Text('Add Event',
-              style: TextStyle(color: Colors.black, fontSize: 20)),
-          centerTitle: true,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-            onPressed: () => Navigator.pop(context),
-          ),
-        ),
-        body: _buildBody(context, state),
-        bottomNavigationBar: GestureDetector(
-          onTap: () {
-            // if (_formKey.currentState!.validate()) {
-            //   context.read<AddEventBloc>().add(
-            //         Event(
-            //           name: _eventNameController.text,
-            //           description: _eventDescController.text,
-            //           location: _eventLocationController.text,
-            //           color: _selectedColor,
-            //           dateTime: _selectedDateTime,
-            //         ),
-            //       );
-            // }
-          },
-          child: Container(
-            height: 60,
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.blue,
-              borderRadius: BorderRadius.circular(8),
+          appBar: AppBar(
+            backgroundColor: Colors.white,
+            elevation: 0,
+            title: const Text('Add Event',
+                style: TextStyle(color: Colors.black, fontSize: 20)),
+            centerTitle: true,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+              onPressed: () => Navigator.pop(context),
             ),
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  'Add',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.normal,
+          ),
+          body: _buildBody(context, state),
+          bottomNavigationBar: GestureDetector(
+            onTap: () {
+              if (_formKey.currentState!.validate()) {
+                // Formani validatsiya qilish
+                context.read<AddEventBloc>().add(
+                      AddEventSubmitted(Event(
+                        name: _eventNameController.text,
+                        description: _eventDescController.text,
+                        location: _eventLocationController.text,
+                        // color: _selectedColor,
+                        // Vaqtni to'g'ri formatda olish
+                        // startTime: _selectedDateTime,
+                        // endTime: _selectedDateTime.add(const Duration(
+                        //     hours: 1)), // Misol tariqasida 1 soat qo'shildi
+                      )),
+                    );
+              }
+            },
+            child: Container(
+              height: 60,
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.blue,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    'Add',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.normal,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-      );
-    });
+        );
+      },
+      listener: (context, state) {
+        if (state is AddEventSuccess) {
+          Navigator.of(context)
+              .pop(); // Muvaffaqiyatli qo'shilgandan so'ng ekranni yopamiz
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Tadbir muvaffaqiyatli qo\'shildi')),
+          );
+        } else if (state is AddEventError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.error)),
+          );
+        }
+      },
+    );
   }
 
   Widget _buildBody(BuildContext context, AddEventState state) {
-    if (state is AddEventSuccess) {
-      // Tadbir muvaffaqiyatli qo'shilganda ekrandan chiqamiz
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.of(context).pop();
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Tadbir muvaffaqiyatli qo\'shildi')),
-      );
-    } else if (state is AddEventError) {
-      // Xatolik yuz berganda xabar ko'rsatamiz
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(state.error)),
-      );
-    }
     return Form(
       key: _formKey,
       child: SingleChildScrollView(
@@ -159,21 +165,31 @@ class _AddEventScreenState extends State<AddEventScreen> {
                   style: Theme.of(context).textTheme.bodyLarge),
               const SizedBox(height: 4),
               _buildTextFormField(
-                maxLines: 4,
-                controller: _eventDescController,
-              ),
+                  maxLines: 4,
+                  controller: _eventDescController,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter an event name';
+                    }
+                    return null;
+                  }),
               //Event Location
               const SizedBox(height: 16),
               Text('Event Location',
                   style: Theme.of(context).textTheme.bodyLarge),
               const SizedBox(height: 4),
               _buildTextFormField(
-                controller: _eventLocationController,
-                suffixIcon: const Icon(
-                  Icons.location_on_rounded,
-                  color: Colors.blue,
-                ),
-              ),
+                  controller: _eventLocationController,
+                  suffixIcon: const Icon(
+                    Icons.location_on_rounded,
+                    color: Colors.blue,
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter an event name';
+                    }
+                    return null;
+                  }),
 
               // Priority Colors
               const SizedBox(height: 16),

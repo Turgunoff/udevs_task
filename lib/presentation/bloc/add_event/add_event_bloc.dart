@@ -10,18 +10,19 @@ class AddEventBloc extends Bloc<AddEventEvent, AddEventState> {
 
   AddEventBloc({required AddEvent addEvent})
       : _addEvent = addEvent,
-        super(AddEventInitial());
+        super(AddEventInitial()) {
+    // Register event handler for AddEventSubmitted
+    on<AddEventSubmitted>(_handleAddEventSubmitted);
+  }
 
-  Stream<AddEventState> mapEventToState(AddEventEvent event) async* {
-    if (event is AddEventSubmitted) {
-      yield AddEventLoading(); // Tadbir qo'shilish jarayonida
-
-      try {
-        await _addEvent(event.event);
-        yield AddEventSuccess();
-      } catch (e) {
-        yield AddEventError(e.toString()); // Xatolik xabarini holatga o'tkazish
-      }
+  Future<void> _handleAddEventSubmitted(
+      AddEventSubmitted event, Emitter<AddEventState> emit) async {
+    emit(AddEventLoading()); // Tadbir qo'shilish jarayonida
+    try {
+      await _addEvent(event.event);
+      emit(AddEventSuccess());
+    } catch (e) {
+      emit(AddEventError(e.toString())); // Xatolik xabarini holatga o'tkazish
     }
   }
 }

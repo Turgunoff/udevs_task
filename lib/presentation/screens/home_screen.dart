@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
+import 'package:udevs_task/presentation/screens/detail_screen.dart';
+import 'package:udevs_task/domain/entities/event.dart';
+import 'package:udevs_task/domain/usecases/get_event.dart';
+import 'package:udevs_task/presentation/screens/add_event_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -10,6 +16,30 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   DateTime _currentDate = DateTime.now();
+  List<Event>? _events; // Tadbirlarni saqlash uchun o'zgaruvchi
+
+  @override
+  void initState() {
+    super.initState();
+    _loadEvents(); // Ekran yuklanganda tadbirlarni yuklash
+  }
+
+  Future<void> _loadEvents() async {
+    final getEvents = GetIt.I<GetEvents>(); // GetEvents use case'ini olish
+    try {
+      final events = await getEvents();
+      print("Events: $events"); // events qiymatini konsolga chiqarish
+      print(
+          "Events: ${events.toString()}"); // events ni String qiymatga o'tkazib konsolga chiqarish
+
+      setState(() {
+        _events = events;
+      });
+    } catch (e) {
+      // Xatolikni qayta ishlash (masalan, foydalanuvchiga xabar berish)
+      print('Xatolik: $e');
+    }
+  }
 
   void _previousMonth() {
     setState(() {
@@ -207,16 +237,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 GestureDetector(
                   onTap: () {
-                    // TODO: Yangi tadbir yaratish ekraniga o'tish
-                    // Navigator.push(
-                    //   context,
-                    //   MaterialPageRoute(
-                    //     builder: (context) => BlocProvider.value(
-                    //       value: BlocProvider.of<AddEventBloc>(context),
-                    //       child: const AddEventScreen(),
-                    //     ),
-                    //   ),
-                    // );
+                    Navigator.of(context)
+                        .push(
+                          MaterialPageRoute(
+                            builder: (context) => const AddEventScreen(),
+                          ),
+                        )
+                        .then((value) =>
+                            _loadEvents()); // Ekran yopilganda tadbirlarni qayta yuklash
                   },
                   child: Container(
                     padding:
@@ -237,81 +265,98 @@ class _HomeScreenState extends State<HomeScreen> {
             ListView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: 10,
+              itemCount: _events?.length ?? 0,
               itemBuilder: (context, index) {
-                return Container(
-                  margin: const EdgeInsets.symmetric(vertical: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.blue[100],
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        height: 10,
-                        decoration: const BoxDecoration(
-                          color: Colors.blue,
-                          borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(8),
-                              topRight: Radius.circular(8)),
-                        ),
+                final event =
+                    _events![index]; // Endi bu yerda events ishlatiladi
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DetailScreen(event: event),
                       ),
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Watching Football',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20,
-                                color: Colors.blue[800],
-                              ),
-                            ),
-                            Text(
-                              'Manchester United vs Arsenal (Premiere League)',
-                              style: TextStyle(
-                                fontWeight: FontWeight.normal,
-                                fontSize: 14,
-                                color: Colors.blue[800],
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                Icon(
-                                  size: 20,
-                                  Icons.access_time_filled_sharp,
-                                  color: Colors.blue[800],
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  '10:00 - 11:00',
-                                  style: TextStyle(
-                                    color: Colors.blue[800],
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Icon(
-                                  Icons.location_on,
-                                  size: 20,
-                                  color: Colors.blue[800],
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  'Stamford Bridge',
-                                  style: TextStyle(
-                                    color: Colors.blue[800],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
+                    ).then((deletedEventId) {
+                      if (deletedEventId != null) {
+                        _loadEvents(); // Tadbirlarni qayta yuklash
+                      }
+                    });
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.blue[100],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          height: 10,
+                          decoration: const BoxDecoration(
+                            color: Colors.blue,
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(8),
+                                topRight: Radius.circular(8)),
+                          ),
                         ),
-                      )
-                    ],
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                event.name,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20,
+                                  color: Colors.blue[800],
+                                ),
+                              ),
+                              Text(
+                                'Manchester United vs Arsenal (Premiere League)',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.normal,
+                                  fontSize: 14,
+                                  color: Colors.blue[800],
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  Icon(
+                                    size: 20,
+                                    Icons.access_time_filled_sharp,
+                                    color: Colors.blue[800],
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    'data',
+                                    // '${dateFormat(event.startTime.toString())} - ${dateFormat(event.endTime.toString())}', // Vaqt oralig'ini ko'rsatish,
+                                    style: TextStyle(
+                                      color: Colors.blue[800],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Icon(
+                                    Icons.location_on,
+                                    size: 20,
+                                    color: Colors.blue[800],
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    event.location,
+                                    style: TextStyle(
+                                      color: Colors.blue[800],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
                   ),
                 );
               },

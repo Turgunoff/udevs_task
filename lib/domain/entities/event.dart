@@ -3,8 +3,8 @@ class Event {
   final String name;
   final String description;
   final String location;
-  final DateTime startTime; // Tadbir boshlanish vaqti
-  final DateTime endTime; // Tadbir tugash vaqti
+  // final DateTime startTime; // Tadbir boshlanish vaqti
+  // final DateTime endTime; // Tadbir tugash vaqti
   // final Color color;
 
   Event({
@@ -12,8 +12,8 @@ class Event {
     required this.name,
     required this.description,
     required this.location,
-    required this.startTime,
-    required this.endTime,
+    // required this.startTime,
+    // required this.endTime,
     // required this.color,
   });
 
@@ -23,8 +23,8 @@ class Event {
         'name': name,
         'description': description,
         'location': location,
-        'startTime': startTime.toIso8601String(),
-        'endTime': endTime.toIso8601String(),
+        // 'startTime': startTime.toIso8601String(),
+        // 'endTime': endTime.toIso8601String(),
         // 'color': color.value.toString(),
       };
 
@@ -34,8 +34,8 @@ class Event {
         name: json['name'],
         description: json['description'],
         location: json['location'],
-        startTime: DateTime.parse(json['startTime']),
-        endTime: DateTime.parse(json['endTime']),
+        // startTime: DateTime.parse(json['startTime']),
+        // endTime: DateTime.parse(json['endTime']),
         // color: Color(int.parse(json['color'])),
       );
 
@@ -45,8 +45,8 @@ class Event {
     String? name,
     String? description,
     String? location,
-    DateTime? startTime,
-    DateTime? endTime,
+    // DateTime? startTime,
+    // DateTime? endTime,
     // Color? color,
   }) {
     return Event(
@@ -54,8 +54,8 @@ class Event {
       name: name ?? this.name,
       description: description ?? this.description,
       location: location ?? this.location,
-      startTime: startTime ?? this.startTime,
-      endTime: endTime ?? this.endTime,
+      // startTime: startTime ?? this.startTime,
+      // endTime: endTime ?? this.endTime,
       // color: color ?? this.color,
     );
   }

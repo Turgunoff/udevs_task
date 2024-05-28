@@ -11,9 +11,9 @@ class AddEvent {
     if (event.name.isEmpty) {
       throw Exception('Tadbir nomi bo\'sh bo\'lmasligi kerak');
     }
-    if (event.startTime.isAfter(event.endTime)) {
-      throw Exception('Boshlanish vaqti tugash vaqtidan oldin bo\'lishi kerak');
-    }
+    // if (event.startTime.isAfter(event.endTime)) {
+    //   throw Exception('Boshlanish vaqti tugash vaqtidan oldin bo\'lishi kerak');
+    // }
 
     try {
       await repository.addEvent(event);
