@@ -80,17 +80,17 @@ class _AddEventScreenState extends State<AddEventScreen> {
         body: _buildBody(context, state),
         bottomNavigationBar: GestureDetector(
           onTap: () {
-            if (_formKey.currentState!.validate()) {
-              context.read<AddEventBloc>().add(
-                    Event(
-                      name: _eventNameController.text,
-                      description: _eventDescController.text,
-                      location: _eventLocationController.text,
-                      color: _selectedColor,
-                      dateTime: _selectedDateTime,
-                    ),
-                  );
-            }
+            // if (_formKey.currentState!.validate()) {
+            //   context.read<AddEventBloc>().add(
+            //         Event(
+            //           name: _eventNameController.text,
+            //           description: _eventDescController.text,
+            //           location: _eventLocationController.text,
+            //           color: _selectedColor,
+            //           dateTime: _selectedDateTime,
+            //         ),
+            //       );
+            // }
           },
           child: Container(
             height: 60,

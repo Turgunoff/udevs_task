@@ -1,4 +1,4 @@
-<!-- lib/
+lib/
 ├── data/
 │ ├── datasources/
 │ │ └── event_local_datasource.dart
@@ -26,4 +26,4 @@
 │ ├── add_event_screen.dart
 │ ├── detail_screen.dart
 │ └── home_screen.dart
-└── main.dart -->
+└── main.dart
