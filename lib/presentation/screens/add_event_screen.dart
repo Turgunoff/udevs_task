@@ -1,5 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:udevs_task/domain/entities/event.dart';
 import 'package:udevs_task/presentation/bloc/add_event/add_event_bloc.dart';
 import 'package:udevs_task/presentation/screens/home_screen.dart';
@@ -18,11 +21,10 @@ class _AddEventScreenState extends State<AddEventScreen> {
   late TextEditingController _eventNameController;
   late TextEditingController _eventDescController;
   late TextEditingController _eventLocationController;
-  TextEditingController _eventTimeController = TextEditingController();
+  TextEditingController _selectedStartTime = TextEditingController();
+  TextEditingController _selectedEndTime = TextEditingController();
   Color _selectedColor = Colors.blue;
   DateTime _selectedDateTime = DateTime.now();
-  DateTime? _selectedStartTime; // Boshlanish vaqti uchun
-  DateTime? _selectedEndTime; // Tugash vaqti uchun
   String type = 'B';
 
   @override
@@ -35,6 +37,11 @@ class _AddEventScreenState extends State<AddEventScreen> {
           TextEditingController(text: widget.event!.description);
       _eventLocationController =
           TextEditingController(text: widget.event!.location);
+      _selectedStartTime = TextEditingController(
+          text:
+              DateFormat('yyyy-MM-dd – kk:mm').format(widget.event!.startTime));
+      _selectedEndTime = TextEditingController(
+          text: DateFormat('yyyy-MM-dd – kk:mm').format(widget.event!.endTime));
       type = widget.event!.type;
 
       // _eventTimeController = TextEditingController(text: widget.event!.dateTime.toString());
@@ -45,6 +52,8 @@ class _AddEventScreenState extends State<AddEventScreen> {
       _eventNameController = TextEditingController();
       _eventDescController = TextEditingController();
       _eventLocationController = TextEditingController();
+      _selectedStartTime = TextEditingController();
+      _selectedEndTime = TextEditingController();
       type = 'B';
       // _eventTimeController = TextEditingController();
       // _selectedColor = Colors.blue; // Default
@@ -129,6 +138,9 @@ class _AddEventScreenState extends State<AddEventScreen> {
                   description: _eventDescController.text,
                   location: _eventLocationController.text,
                   type: type,
+                  startTime: _selectedStartTime.text,
+                  endTime: _selectedEndTime,
+
                   // color: _selectedColor,
                   // startTime: _selectedDateTime,
                   // endTime: _selectedDateTime.add(const Duration(hours: 1)),
@@ -280,35 +292,80 @@ class _AddEventScreenState extends State<AddEventScreen> {
               const SizedBox(height: 16),
               Text('Event time', style: Theme.of(context).textTheme.bodyLarge),
               const SizedBox(height: 4),
-              TextFormField(
-                readOnly: true,
-                controller: _eventTimeController, // Use the time controller
-                decoration: _inputDecoration().copyWith(),
-                onTap: () async {
-                  final picked = await showDatePicker(
-                    context: context,
-                    initialDate: _selectedDateTime,
-                    firstDate: DateTime(2023),
-                    lastDate: DateTime(2025),
-                  );
-                  final time = await showTimePicker(
-                    context: context,
-                    initialTime: TimeOfDay.fromDateTime(_selectedDateTime),
-                  );
-                  if (picked != null && time != null) {
-                    setState(() {
-                      _selectedDateTime = DateTime(
-                        picked.year,
-                        picked.month,
-                        picked.day,
-                        time.hour,
-                        time.minute,
-                      );
-                      // Update the text field
-                      _eventTimeController.text = _selectedDateTime.toString();
-                    });
-                  }
-                },
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  SizedBox(
+                    width: MediaQuery.sizeOf(context).width * 0.45,
+                    child: TextFormField(
+                      readOnly: true,
+                      controller: _selectedStartTime, // Use the time controller
+                      decoration: _inputDecoration().copyWith(),
+                      onTap: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: _selectedDateTime,
+                          firstDate: DateTime(2023),
+                          lastDate: DateTime(2025),
+                        );
+                        final time = await showTimePicker(
+                          context: context,
+                          initialTime:
+                              TimeOfDay.fromDateTime(_selectedDateTime),
+                        );
+                        if (picked != null && time != null) {
+                          setState(() {
+                            _selectedDateTime = DateTime(
+                              picked.year,
+                              picked.month,
+                              picked.day,
+                              time.hour,
+                              time.minute,
+                            );
+                            // Update the text field
+                            _selectedStartTime.text =
+                                _selectedDateTime.toString();
+                          });
+                        }
+                      },
+                    ),
+                  ),
+                  SizedBox(
+                    width: MediaQuery.sizeOf(context).width * 0.45,
+                    child: TextFormField(
+                      readOnly: true,
+                      controller: _selectedEndTime, // Use the time controller
+                      decoration: _inputDecoration().copyWith(),
+                      onTap: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: _selectedDateTime,
+                          firstDate: DateTime(2023),
+                          lastDate: DateTime(2025),
+                        );
+                        final time = await showTimePicker(
+                          context: context,
+                          initialTime:
+                              TimeOfDay.fromDateTime(_selectedDateTime),
+                        );
+                        if (picked != null && time != null) {
+                          setState(() {
+                            _selectedDateTime = DateTime(
+                              picked.year,
+                              picked.month,
+                              picked.day,
+                              time.hour,
+                              time.minute,
+                            );
+                            // Update the text field
+                            _selectedEndTime.text =
+                                _selectedDateTime.toString();
+                          });
+                        }
+                      },
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
