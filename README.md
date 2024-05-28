@@ -1,5 +1,7 @@
 lib/
+
 ├── data/
+
 │ ├── datasources/
 │ │ └── event_local_datasource.dart
 │ └── repositories/
