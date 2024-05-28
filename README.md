@@ -1,16 +1,29 @@
-# udevs_task
-
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+lib/
+├── data/
+│ ├── datasources/
+│ │ └── event_local_datasource.dart
+│ └── repositories/
+│ └── event_repository_impl.dart
+├── domain/
+│ ├── entities/
+│ │ └── event.dart
+│ └── usecases/
+│ ├── add_event.dart
+│ ├── delete_event.dart
+│ ├── get_events.dart
+│ └── update_event.dart
+├── presentation/
+│ ├── bloc/
+│ │ ├── add_event/
+│ │ │ ├── add_event_bloc.dart
+│ │ │ ├── add_event_event.dart
+│ │ │ └── add_event_state.dart
+│ │ └── home_screen/
+│ │ ├── home_screen_bloc.dart
+│ │ ├── home_screen_event.dart
+│ │ └── home_screen_state.dart
+│ └── screens/
+│ ├── add_event_screen.dart
+│ ├── detail_screen.dart
+│ └── home_screen.dart
+└── main.dart
