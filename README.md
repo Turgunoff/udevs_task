@@ -14,14 +14,10 @@ lib/
 │     └── update_event.dart  
 ├── presentation/  
 │   ├── bloc/  
-│   │   ├── add_event/  
-│   │   │   ├── add_event_bloc.dart  
-│   │   │   ├── add_event_event.dart  
-│   │   │   └── add_event_state.dart  
-│   │   └── home_screen/  
-│   │     ├── home_screen_bloc.dart  
-│   │     ├── home_screen_event.dart  
-│   │     └── home_screen_state.dart  
+│   │   └── add_event/  
+│   │     ├── add_event_bloc.dart  
+│   │     ├── add_event_event.dart  
+│   │     └── add_event_state.dart  
 │   └── screens/  
 │     ├── add_event_screen.dart  
 │     ├── detail_screen.dart  
