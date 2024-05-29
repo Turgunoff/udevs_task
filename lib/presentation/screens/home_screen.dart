@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
@@ -15,12 +17,15 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   DateTime _currentDate = DateTime.now();
-  List<Event>? _events; // Tadbirlarni saqlash uchun o'zgaruvchi
+  final List<Event> events = [];
+
+  List<Event>? _events; // Variable to save events
+  List<Event> _filteredEvents = [];
 
   @override
   void initState() {
     super.initState();
-    _loadEvents(); // Ekran yuklanganda tadbirlarni yuklash
+    _loadEvents(); // Upload events when the screen loads
   }
 
   Future<void> _loadEvents() async {
@@ -29,10 +34,34 @@ class _HomeScreenState extends State<HomeScreen> {
       final events = await getEvents();
       setState(() {
         _events = events;
+        _filterEvents();
       });
     } catch (e) {
-      print('Xatolik: $e');
+      print('Error loading events: $e');
     }
+  }
+
+  // Event filtering function
+  void _filterEvents() {
+    setState(() {
+      _filteredEvents = _events
+              ?.where((event) => isSameDay(event.startTime, _currentDate))
+              .toList() ??
+          [];
+    });
+  }
+
+  void _onDaySelected(DateTime date) {
+    setState(() {
+      _currentDate = date;
+    });
+    _filterEvents();
+  }
+
+  bool isSameDay(DateTime date1, DateTime date2) {
+    return date1.year == date2.year &&
+        date1.month == date2.month &&
+        date1.day == date2.day;
   }
 
   Color _getColorFromCode(String colorCode) {
@@ -44,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
       case 'Y':
         return Colors.purple;
       default:
-        return Colors.blue; // Standart rang (ko'k)
+        return Colors.blue;
     }
   }
 
@@ -52,12 +81,14 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _currentDate = DateTime(_currentDate.year, _currentDate.month - 1);
     });
+    _filterEvents();
   }
 
   void _nextMonth() {
     setState(() {
       _currentDate = DateTime(_currentDate.year, _currentDate.month + 1);
     });
+    _filterEvents();
   }
 
   bool isToday(DateTime date) {
@@ -69,15 +100,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final daysInMonth = DateTime(_currentDate.year, _currentDate.month + 1,
-            0) // Keyingi oyning 0-kuni
-        .day;
-    final firstDayOfWeek = _currentDate.weekday;
-    final totalDays = daysInMonth +
-        firstDayOfWeek -
-        1; // Birinchi haftadagi bo'sh kataklar uchun
-    final rows = (totalDays / 7).ceil(); // Qatorlar soni
-
+    final daysInMonth =
+        DateTime(_currentDate.year, _currentDate.month + 1, 0).day;
+    final firstDayOfMonth = DateTime(_currentDate.year, _currentDate.month, 1);
+    final firstDayOfWeek = firstDayOfMonth.weekday;
+    final totalDays =
+        daysInMonth + firstDayOfWeek - 1; // For empty cells in the first week
+    final rows = (totalDays / 7).ceil();
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -92,8 +121,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             Text(
               style: const TextStyle(fontSize: 14, color: Colors.black),
-              DateFormat('d MMMM yyyy')
-                  .format(DateTime.now()), // Joriy sana va kun (O'zbek tilida)
+              DateFormat('d MMMM yyyy').format(DateTime.now()),
             ),
           ],
         ),
@@ -107,14 +135,12 @@ class _HomeScreenState extends State<HomeScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  DateFormat('MMMM')
-                      .format(_currentDate), // Joriy oy (O'zbek tilida)
+                  DateFormat('MMMM').format(_currentDate),
                   style: const TextStyle(
                       fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 Text(
-                  DateFormat('yyyy')
-                      .format(_currentDate), // Joriy oy (O'zbek tilida)
+                  DateFormat('yyyy').format(_currentDate),
                   style: const TextStyle(
                       fontSize: 18, fontWeight: FontWeight.bold),
                 ),
@@ -150,13 +176,15 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 16),
             Row(
-              // Hafta kunlari nomlari
+              // Weekday names
               children: List.generate(7, (index) {
                 return Expanded(
                   child: Center(
                     child: Text(
-                      DateFormat.E().format(DateTime(
-                          2024, 5, 20 + index)), // Hafta kunlarini olish
+                      DateFormat.E()
+                          .format(DateTime(
+                              2024, 5, 20 + index)) // Getting days of the week
+                          .substring(0, 3),
                       style: const TextStyle(
                           fontWeight: FontWeight.normal, color: Colors.grey),
                     ),
@@ -165,68 +193,69 @@ class _HomeScreenState extends State<HomeScreen> {
               }),
             ),
             GridView.builder(
-              shrinkWrap: true, // GridView hajmini moslashtirish
-              physics:
-                  const NeverScrollableScrollPhysics(), // GridView ichida scrollni o'chirish
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 7, // 7 ustun
-                childAspectRatio: 1.2, // Kataklarning nisbati
+                crossAxisCount: 7,
+                childAspectRatio: 1.2, // Ratio of cells
               ),
-              itemCount: rows * 7, // Barcha kataklar soni
+              itemCount: rows * 7, // Number of all cells
               itemBuilder: (context, index) {
                 final day = index - firstDayOfWeek + 2;
                 final date =
                     DateTime(_currentDate.year, _currentDate.month, day);
+                bool isSelected = isSameDay(date, _currentDate);
 
                 if (index < firstDayOfWeek - 1 || day > daysInMonth) {
-                  return Container(); // Bo'sh katak
+                  return Container(); // Empty cell
                 } else {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: isToday(date)
-                                ? Colors.blue
-                                : null, // Bugungi kunni tekshirish
-                          ),
-                          child: Text(
-                            style: TextStyle(
-                              color:
-                                  isToday(date) ? Colors.white : Colors.black,
+                  final eventsForDay = events
+                      .where((event) => isSameDay(event.startTime, date))
+                      .toList();
+
+                  return GestureDetector(
+                    onTap: () {
+                      _onDaySelected(date);
+                    },
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: isSelected
+                                  ? Colors.blue
+                                  : null, // Checking today
                             ),
-                            day.toString(),
-                          ),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              height: 4,
-                              width: 4,
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.blue,
+                            child: Text(
+                              style: TextStyle(
+                                color: isSelected ? Colors.white : Colors.black,
                               ),
+                              day.toString(),
                             ),
-                            if (isToday(date))
-                              Container(
+                          ),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: eventsForDay.map((event) {
+                              final eventColor = _getColorFromCode(event.type);
+                              return Container(
+                                width: 6,
+                                height: 6,
                                 margin:
-                                    const EdgeInsets.symmetric(horizontal: 2),
-                                height: 4,
-                                width: 4,
-                                decoration: const BoxDecoration(
+                                    const EdgeInsets.symmetric(horizontal: 1),
+                                decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: Colors.red,
+                                  color: eventColor,
                                 ),
-                              ),
-                          ],
-                        )
-                      ],
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 }
@@ -251,7 +280,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         )
                         .then((value) =>
-                            _loadEvents()); // Ekran yopilganda tadbirlarni qayta yuklash
+                            _loadEvents()); // Reload events when the screen is closed
                   },
                   child: Container(
                     padding:
@@ -269,107 +298,109 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
             const SizedBox(height: 16),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: _events?.length ?? 0,
-              itemBuilder: (context, index) {
-                final event =
-                    _events![index]; // Endi bu yerda events ishlatiladi
-                final eventColor = _getColorFromCode(event.type);
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DetailScreen(event: event),
-                      ),
-                    ).then((deletedEventId) {
-                      if (deletedEventId != null) {
-                        _loadEvents(); // Tadbirlarni qayta yuklash
-                      }
-                    });
-                  },
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    decoration: BoxDecoration(
-                      color: eventColor.withAlpha(100),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          height: 10,
-                          decoration: BoxDecoration(
-                            color: eventColor,
-                            borderRadius: const BorderRadius.only(
-                                topLeft: Radius.circular(8),
-                                topRight: Radius.circular(8)),
-                          ),
+            if (_events == null) // Checking event loading
+              const Center(child: CircularProgressIndicator())
+            else if (_filteredEvents.isEmpty)
+              const Center(child: Text("No data"))
+            else
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: _events?.length ?? 0,
+                itemBuilder: (context, index) {
+                  final event = _events![index]; // Now events are used here
+                  final eventColor = _getColorFromCode(event.type);
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DetailScreen(event: event),
                         ),
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                event.name,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20,
-                                  color: eventColor.withAlpha(255),
-                                ),
-                              ),
-                              Text(
-                                // 'Manchester United vs Arsenal (Premiere League)',
-                                event.type,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.normal,
-                                  fontSize: 14,
-                                  color: eventColor.withAlpha(255),
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  Icon(
-                                    size: 20,
-                                    Icons.access_time_filled_sharp,
+                      ).then((deletedEventId) {
+                        if (deletedEventId != null) {
+                          _loadEvents();
+                        }
+                      });
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(vertical: 8),
+                      decoration: BoxDecoration(
+                        color: eventColor.withAlpha(100),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            height: 10,
+                            decoration: BoxDecoration(
+                              color: eventColor,
+                              borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(8),
+                                  topRight: Radius.circular(8)),
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  event.name,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 20,
                                     color: eventColor.withAlpha(255),
                                   ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    'data',
-                                    // '${dateFormat(event.startTime.toString())} - ${dateFormat(event.endTime.toString())}', // Vaqt oralig'ini ko'rsatish,
-                                    style: TextStyle(
+                                ),
+                                Text(
+                                  event.description,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.normal,
+                                    fontSize: 14,
+                                    color: eventColor.withAlpha(255),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      size: 20,
+                                      Icons.access_time_filled_sharp,
                                       color: eventColor.withAlpha(255),
                                     ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Icon(
-                                    Icons.location_on,
-                                    size: 20,
-                                    color: eventColor.withAlpha(255),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    event.location,
-                                    style: TextStyle(
-                                      color: eventColor,
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      '${DateFormat('kk:mm').format(event.startTime)} - ${DateFormat('kk:mm').format(event.endTime)}', // Vaqt oralig'ini ko'rsatish,
+                                      style: TextStyle(
+                                        color: eventColor.withAlpha(255),
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        )
-                      ],
+                                    const SizedBox(width: 8),
+                                    Icon(
+                                      Icons.location_on,
+                                      size: 20,
+                                      color: eventColor.withAlpha(255),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      event.location,
+                                      style: TextStyle(
+                                        color: eventColor,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              },
-            ),
+                  );
+                },
+              ),
           ],
         ),
       ),

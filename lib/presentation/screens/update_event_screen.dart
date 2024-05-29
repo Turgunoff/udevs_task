@@ -7,7 +7,7 @@ import 'package:udevs_task/presentation/screens/add_event_screen.dart';
 class UpdateEventScreen extends StatelessWidget {
   final Event event;
 
-  const UpdateEventScreen({Key? key, required this.event}); // Konstruktor
+  const UpdateEventScreen({super.key, required this.event}); // Konstruktor
 
   @override
   Widget build(BuildContext context) {

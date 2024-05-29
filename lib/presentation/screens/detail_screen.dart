@@ -1,5 +1,8 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:intl/intl.dart';
 import 'package:udevs_task/domain/entities/event.dart';
 import 'package:udevs_task/domain/usecases/delete_event.dart';
 import 'package:udevs_task/presentation/screens/update_event_screen.dart';
@@ -17,7 +20,7 @@ class DetailScreen extends StatelessWidget {
       case 'Y':
         return Colors.purple;
       default:
-        return Colors.blue; // Standart rang (ko'k)
+        return Colors.blue;
     }
   }
 
@@ -34,7 +37,7 @@ class DetailScreen extends StatelessWidget {
               padding: const EdgeInsets.all(26),
               decoration: BoxDecoration(
                 color: eventColor,
-                borderRadius: BorderRadius.only(
+                borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(30),
                   bottomRight: Radius.circular(30),
                 ),
@@ -102,24 +105,25 @@ class DetailScreen extends StatelessWidget {
                         color: Colors.white,
                         fontWeight: FontWeight.w500),
                   ),
-                  const Text(
-                    'Manchester United vs Arsenal (Premiere League)',
-                    style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.white,
-                        fontWeight: FontWeight.normal),
-                  ),
+                  // const Text(
+                  //   'Manchester United vs Arsenal (Premiere League)',
+                  //   style: TextStyle(
+                  //       fontSize: 12,
+                  //       color: Colors.white,
+                  //       fontWeight: FontWeight.normal),
+                  // ),
                   const SizedBox(height: 8),
-                  const Row(
+                  Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.access_time_filled,
                         color: Colors.white,
                         size: 16,
                       ),
-                      SizedBox(width: 4),
-                      Text('17:00 - 18:30',
-                          style: TextStyle(color: Colors.white)),
+                      const SizedBox(width: 4),
+                      Text(
+                          '${DateFormat('kk:mm').format(event.startTime)} - ${DateFormat('kk:mm').format(event.endTime)}',
+                          style: const TextStyle(color: Colors.white)),
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -176,18 +180,18 @@ class DetailScreen extends StatelessWidget {
       ),
       bottomNavigationBar: GestureDetector(
         onTap: () async {
-          final deleteEvent = GetIt.I<DeleteEvent>(); // Use case ni olish
+          final deleteEvent = GetIt.I<DeleteEvent>();
 
           try {
-            await deleteEvent(event.id!); // Tadbirni o'chirish
-            Navigator.of(context).pop(event.id); // Ekrandan chiqish
+            await deleteEvent(event.id!); // Delete event
+            Navigator.of(context).pop(event.id);
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                  content: Text('Tadbir muvaffaqiyatli o\'chirildi')),
+                  content: Text('The event was successfully deleted')),
             );
           } catch (e) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Xatolik: $e')),
+              SnackBar(content: Text('Error: $e')),
             );
           }
         },

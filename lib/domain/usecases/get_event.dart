@@ -9,9 +9,9 @@ class GetEvents {
   Future<List<Event>> call() async {
     try {
       final events = await repository.getEvents();
-      return events; // Tadbirlarni muvaffaqiyatli qaytarish
+      return events;
     } on Exception catch (e) {
-      throw Exception('Tadbirlarni olishda xatolik yuz berdi: $e');
+      throw Exception('Error in getting the event: $e');
     }
   }
 }

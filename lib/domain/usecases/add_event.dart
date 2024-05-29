@@ -7,18 +7,18 @@ class AddEvent {
   AddEvent(this.repository);
 
   Future<void> call(Event event) async {
-    // Validatsiya (misol uchun)
+    // Validation (for example)
     if (event.name.isEmpty) {
-      throw Exception('Tadbir nomi bo\'sh bo\'lmasligi kerak');
+      throw Exception('Event name should not be empty');
     }
-    // if (event.startTime.isAfter(event.endTime)) {
-    //   throw Exception('Boshlanish vaqti tugash vaqtidan oldin bo\'lishi kerak');
-    // }
+    if (event.startTime.isAfter(event.endTime)) {
+      throw Exception('The start time should be before the end time');
+    }
 
     try {
       await repository.addEvent(event);
     } catch (e) {
-      throw Exception('Tadbirni qo\'shishda xatolik yuz berdi: $e');
+      throw Exception('Error in adding the event: $e');
     }
   }
 }

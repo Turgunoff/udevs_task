@@ -1,16 +1,18 @@
 import 'dart:async'; // Future uchun
 
+// ignore: depend_on_referenced_packages
 import 'package:path/path.dart' as path;
 import 'package:sqflite/sqflite.dart';
 import 'package:udevs_task/domain/entities/event.dart';
 
 class EventLocalDatasource {
-  Database? _database; // Ma'lumotlar bazasi obyekti
+  Database? _database; // Database object
 
   Future<Database> get database async {
     if (_database != null) return _database!;
 
-    _database = await _initDatabase(); // Ma'lumotlar bazasini ilk marta ochish
+    _database =
+        await _initDatabase(); // Opening the database for the first time
     return _database!;
   }
 
@@ -28,27 +30,29 @@ class EventLocalDatasource {
             name TEXT,
             description TEXT,
             location TEXT,
-            type TEXT
+            type TEXT,
+            startTime DATETIME,
+            endTime DATETIME
           )
         ''');
       },
     );
   }
 
-  // Tadbir qo'shish
+  // Add event
   Future<void> addEvent(Event event) async {
     final db = await database;
     await db.insert('events', event.toJson());
   }
 
-  // Tadbirlarni olish
+  // Get event
   Future<List<Event>> getEvents() async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query('events');
     return List.generate(maps.length, (i) => Event.fromJson(maps[i]));
   }
 
-  // Tadbirni yangilash
+  // Update event
   Future<void> updateEvent(Event event) async {
     final db = await database;
     await db.update(
@@ -59,7 +63,7 @@ class EventLocalDatasource {
     );
   }
 
-  // Tadbirni o'chirish
+  // Delete event
   Future<void> deleteEvent(int id) async {
     final db = await database;
     await db.delete(

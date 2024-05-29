@@ -10,7 +10,7 @@ class UpdateEvent {
     try {
       await repository.updateEvent(event);
     } on Exception catch (e) {
-      throw Exception('Tadbirni yangilashda xatolik yuz berdi: $e');
+      throw Exception('Error in updating the event: $e');
     }
   }
 }

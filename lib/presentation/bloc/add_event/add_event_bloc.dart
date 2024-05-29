@@ -1,5 +1,4 @@
 import 'package:bloc/bloc.dart';
-import 'package:udevs_task/data/repositories/event_repository.dart';
 import 'package:udevs_task/domain/entities/event.dart';
 import 'package:udevs_task/domain/usecases/add_event.dart';
 import 'package:udevs_task/domain/usecases/update_event.dart';

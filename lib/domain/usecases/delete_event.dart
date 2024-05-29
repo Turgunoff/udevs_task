@@ -9,7 +9,7 @@ class DeleteEvent {
     try {
       await repository.deleteEvent(eventId);
     } on Exception catch (e) {
-      throw Exception('Tadbirni o\'chirishda xatolik yuz berdi: $e');
+      throw Exception('Error in deleting the event: $e');
     }
   }
 }

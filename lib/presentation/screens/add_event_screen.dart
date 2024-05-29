@@ -1,6 +1,6 @@
-import 'package:flutter/cupertino.dart';
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:udevs_task/domain/entities/event.dart';
@@ -25,13 +25,13 @@ class _AddEventScreenState extends State<AddEventScreen> {
   TextEditingController _selectedEndTime = TextEditingController();
   Color _selectedColor = Colors.blue;
   DateTime _selectedDateTime = DateTime.now();
-  String type = 'B';
+  String type = '';
 
   @override
   void initState() {
     super.initState();
     if (widget.event != null) {
-      // Tahrirlash rejimida
+      //  Edit mode
       _eventNameController = TextEditingController(text: widget.event!.name);
       _eventDescController =
           TextEditingController(text: widget.event!.description);
@@ -39,25 +39,18 @@ class _AddEventScreenState extends State<AddEventScreen> {
           TextEditingController(text: widget.event!.location);
       _selectedStartTime = TextEditingController(
           text:
-              DateFormat('yyyy-MM-dd – kk:mm').format(widget.event!.startTime));
+              DateFormat('yyyy-MM-dd - kk:mm').format(widget.event!.startTime));
       _selectedEndTime = TextEditingController(
-          text: DateFormat('yyyy-MM-dd – kk:mm').format(widget.event!.endTime));
+          text: DateFormat('yyyy-MM-dd - kk:mm').format(widget.event!.endTime));
       type = widget.event!.type;
-
-      // _eventTimeController = TextEditingController(text: widget.event!.dateTime.toString());
-      // _selectedColor = widget.event!.color;
-      // _selectedDateTime = widget.event!.dateTime;
     } else {
-      // Yangi tadbir qo'shish rejimida
+      // New event Add mode
       _eventNameController = TextEditingController();
       _eventDescController = TextEditingController();
       _eventLocationController = TextEditingController();
       _selectedStartTime = TextEditingController();
       _selectedEndTime = TextEditingController();
-      type = 'B';
-      // _eventTimeController = TextEditingController();
-      // _selectedColor = Colors.blue; // Default
-      // _selectedDateTime = DateTime.now(); // Default
+      type = '';
     }
   }
 
@@ -123,7 +116,17 @@ class _AddEventScreenState extends State<AddEventScreen> {
           bottomNavigationBar: GestureDetector(
             onTap: () {
               if (_formKey.currentState!.validate()) {
-                String type = ''; // blueColor o'zgaruvchisini e'lon qilish
+                DateTime? startTime =
+                    DateTime.tryParse(_selectedStartTime.text);
+                DateTime? endTime = DateTime.tryParse(_selectedEndTime.text);
+
+                if (startTime == null || endTime == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('Incorrect date or time format!')),
+                  );
+                  return;
+                }
 
                 if (_selectedColor == Colors.blue) {
                   type = 'B';
@@ -138,16 +141,13 @@ class _AddEventScreenState extends State<AddEventScreen> {
                   description: _eventDescController.text,
                   location: _eventLocationController.text,
                   type: type,
-                  startTime: _selectedStartTime.text,
-                  endTime: _selectedEndTime,
-
-                  // color: _selectedColor,
-                  // startTime: _selectedDateTime,
-                  // endTime: _selectedDateTime.add(const Duration(hours: 1)),
+                  startTime: startTime,
+                  endTime: endTime,
                 );
 
                 context.read<AddEventBloc>().add(
-                      widget.event == null // Shartga qarab mos eventni yuborish
+                      widget.event ==
+                              null // Sending a suitable event depending on the condition
                           ? AddEventSubmitted(event)
                           : UpdateEventSubmitted(event),
                     );
@@ -180,17 +180,18 @@ class _AddEventScreenState extends State<AddEventScreen> {
       },
       listener: (context, state) async {
         if (state is AddEventSuccess) {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const HomeScreen(),
-            ),
-          ); // Muvaffaqiyatli qo'shilgandan so'ng ekranni yopamiz
+          Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                  builder: (BuildContext context) => const HomeScreen()),
+              (route) => false);
+
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
                 content: Text(
               widget.event == null
-                  ? 'Tadbir muvaffaqiyatli qo\'shildi'
-                  : 'Tadbir muvaffaqiyatli yangilandi',
+                  ? 'The event was successfully added'
+                  : 'The event was successfully updated',
             )),
           );
         } else if (state is AddEventError) {
@@ -324,7 +325,11 @@ class _AddEventScreenState extends State<AddEventScreen> {
                             );
                             // Update the text field
                             _selectedStartTime.text =
-                                _selectedDateTime.toString();
+                                DateFormat('yyyy-MM-dd HH:mm')
+                                    .format(
+                                      _selectedDateTime,
+                                    )
+                                    .toString();
                           });
                         }
                       },
@@ -359,7 +364,11 @@ class _AddEventScreenState extends State<AddEventScreen> {
                             );
                             // Update the text field
                             _selectedEndTime.text =
-                                _selectedDateTime.toString();
+                                DateFormat('yyyy-MM-dd HH:mm')
+                                    .format(
+                                      _selectedDateTime,
+                                    )
+                                    .toString();
                           });
                         }
                       },

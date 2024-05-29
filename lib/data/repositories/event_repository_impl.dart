@@ -12,7 +12,7 @@ class EventRepositoryImpl implements EventRepository {
     try {
       await datasource.addEvent(event);
     } on Exception catch (e) {
-      throw Exception('Tadbirni qo\'shishda xatolik yuz berdi: $e');
+      throw Exception('Error in adding the event: $e');
     }
   }
 
@@ -22,7 +22,7 @@ class EventRepositoryImpl implements EventRepository {
       final events = await datasource.getEvents();
       return events;
     } on Exception catch (e) {
-      throw Exception('Tadbirlarni olishda xatolik yuz berdi: $e');
+      throw Exception('Error in getting the event: $e');
     }
   }
 
@@ -31,7 +31,7 @@ class EventRepositoryImpl implements EventRepository {
     try {
       await datasource.updateEvent(event);
     } on Exception catch (e) {
-      throw Exception('Tadbirni yangilashda xatolik yuz berdi: $e');
+      throw Exception('Error in updating the event: $e');
     }
   }
 
@@ -40,7 +40,7 @@ class EventRepositoryImpl implements EventRepository {
     try {
       await datasource.deleteEvent(id);
     } on Exception catch (e) {
-      throw Exception('Tadbirni o\'chirishda xatolik yuz berdi: $e');
+      throw Exception('Error in deleting the event: $e');
     }
   }
 }

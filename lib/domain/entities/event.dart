@@ -1,12 +1,10 @@
-import 'dart:ui';
-
 class Event {
   final int? id;
   final String name;
   final String description;
   final String location;
-  final DateTime startTime; // Tadbir boshlanish vaqti
-  final DateTime endTime; // Tadbir tugash vaqti
+  final DateTime startTime;
+  final DateTime endTime;
   final String type;
 
   Event({
@@ -19,7 +17,6 @@ class Event {
     required this.type,
   });
 
-  // JSON seriyallashtirish uchun toJson metodi
   Map<String, dynamic> toJson() => {
         'id': id,
         'name': name,
@@ -30,7 +27,6 @@ class Event {
         'type': type,
       };
 
-  // JSON deseriyallashtirish uchun fromJson factory konstruktori
   factory Event.fromJson(Map<String, dynamic> json) => Event(
         id: json['id'],
         name: json['name'],
@@ -41,7 +37,6 @@ class Event {
         type: json['type'],
       );
 
-  // Obyektni nusxalash uchun copyWith metodi
   Event copyWith({
     int? id,
     String? name,
